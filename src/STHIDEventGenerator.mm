@@ -162,7 +162,7 @@ NS_INLINE void _DTXCalcLinearPinchStartEndPoints(CGRect bounds, CGFloat pixelsSc
 
     CGSize screenSize = [[UIScreen mainScreen] _unjailedReferenceBoundsInPixels].size;
 #if !TARGET_IPHONE_SIMULATOR
-    if (gShouldApplyOrientationFix) {
+    if (shouldApplyOrientationFixForCurrentRuntime()) {
         _physicalScreenSize = CGSizeMake(screenSize.height, screenSize.width);
     } else {
 #endif

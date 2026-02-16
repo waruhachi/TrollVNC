@@ -3007,13 +3007,8 @@ NS_INLINE CGPoint vncPointToDevicePoint(int vx, int vy) {
     // back to device capture space (portrait, gSrcWidth x gSrcHeight), inverting rotation.
     int rotQ = (gOrientationSyncEnabled ? gRotationQuad.load(std::memory_order_relaxed) : 0) & 3;
 
-#if !TARGET_IPHONE_SIMULATOR
-    // On iPad, align input coordinates with an extra +270° CW rotation
-    // (i.e., -90°) per corrected requirement.
-    int effRotQ = (rotQ + (gShouldApplyOrientationFix ? 3 : 0)) & 3;
-#else
-    int effRotQ = rotQ;
-#endif
+    // Apply legacy iPad orientation fix when requested by the runtime.
+    int effRotQ = shouldApplyOrientationFixForCurrentRuntime() ? ((rotQ + 3) & 3) : rotQ;
 
     // Dimensions of the rotated (pre-scale) stage
     int rotW = (effRotQ % 2 == 0) ? gSrcWidth : gSrcHeight;
@@ -4423,7 +4418,7 @@ NS_INLINE UIInterfaceOrientation makeInterfaceOrientationRotate90(UIInterfaceOri
 // Map UIInterfaceOrientation to rotation quadrant (clockwise degrees/90)
 NS_INLINE int rotationForOrientation(UIInterfaceOrientation o) {
 #if !TARGET_IPHONE_SIMULATOR
-    if (gShouldApplyOrientationFix) {
+    if (shouldApplyOrientationFixForCurrentRuntime()) {
         o = makeInterfaceOrientationRotate90(o);
     }
 #endif
@@ -5039,7 +5034,7 @@ static void ensureSingleton(const char *argv[]) {
 #endif
 
 int main(int argc, const char *argv[]) {
-
+	
     /* Drop privileges: this program should run as mobile */
     dropPrivileges();
 
